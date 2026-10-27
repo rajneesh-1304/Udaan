@@ -1,36 +1,48 @@
 import { Controller, Post, Body, Res, } from '@nestjs/common';
 import { Response } from 'express';
-import { LoginUserDto } from 'src/domain/DTO/login';
-import { LoginService } from './login.service';
+import { LoginHandler } from './login.service';
+import { LoginDto } from './login.dto';
+import { LoginCommand } from './login.command';
 const jwt = require('jsonwebtoken');
 
 @Controller('auth')
 export class LoginController {
-  constructor(private readonly loginService: LoginService) { }
+  constructor(private readonly handler: LoginHandler) { }
 
   @Post('login')
   async loginUser(
-    @Body() loginDto: LoginUserDto,
+    @Body() data: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const user = await this.loginService.login(loginDto);
+    const loginCommand = new LoginCommand(data);
+    const user = await this.handler.handle(loginCommand);
 
     const token = jwt.sign(
-      { userId: user.id }, 
+      {
+        uuid: user.uuid,
+        email: user.email
+      },
       process.env.JWT_SECRET,
-      { expiresIn: '8h' }
+      { expiresIn: '1h' }
     );
 
-    res.cookie('token', token, {
+    res.cookie('access_token', token, {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
-      maxAge: 1000 * 60 * 60 * 8,
+      maxAge: 1000 * 60 * 60 * 1,
     });
-    
-    return {
-      message: 'User logged in successfully',
-      user,
-    };
+
+    res.cookie('refresh_token', token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 1000 * 60 * 60 * 30,
+    });
+
+    return res.status(200).json({
+      message: "User logged in successfully",
+      user
+    })
   }
 }

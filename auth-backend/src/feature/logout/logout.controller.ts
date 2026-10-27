@@ -1,6 +1,5 @@
 import { Controller, Post, Body, Res,  } from '@nestjs/common';
 import { Response } from 'express';
-import { LoginUserDto } from 'src/domain/DTO/login';
 
 @Controller('auth')
 export class LogoutController {
@@ -9,10 +8,11 @@ export class LogoutController {
   async logoutUser(
     @Res({ passthrough: true }) res: Response,
   ) {
-    res.clearCookie('token', { httpOnly: true, secure: true, path: '/' });
+    res.clearCookie('access_token', { httpOnly: true, secure: false });
+    res.clearCookie('refresh_token', { httpOnly: true, secure: false });
 
-    return {
-      message: 'User logged out successfully',
-    };
+    return res.status(200).json({
+      message: "User logged out successfully"
+    })
   }
 }

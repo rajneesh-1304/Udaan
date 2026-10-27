@@ -1,60 +1,51 @@
 import {
     ConflictException,
     Injectable,
-    UnauthorizedException,
 } from '@nestjs/common';
-import { Outbox } from 'src/domain/entity/outbox.entity';
-import { User } from 'src/domain/entity/user.entity';
-import { adminAuth } from 'src/firebaseAdmin';
-import { DataSource } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Auth } from 'src/domain/auth/auth.entity';
+import { AuthRepository } from 'src/infrastructure/repositories/auth.repository';
+import { RegisterCommand } from './register.command';
+import bcrypt from "bcrypt";
+import { OutboxMessageRepository } from 'src/infrastructure/repositories/outbox.repository';
+import { UserRegister } from 'src/domain/auth/events/user-registered';
 
 @Injectable()
-export class RegisterService {
-    constructor(private readonly dataSource: DataSource) { }
+export class RegisterHandler {
+    constructor(
+        @InjectRepository(Auth)
+        private readonly repository: AuthRepository,
+        @InjectRepository(OutboxMessageRepository)
+        private readonly outboxMessageRepository: OutboxMessageRepository,
+    ) { }
 
-    async register(data: any) {
-        const queryRunner = this.dataSource.createQueryRunner();
-        await queryRunner.connect();
-        await queryRunner.startTransaction();
-        try {
-            const decodedToken = await adminAuth.verifyIdToken(data.token);
-            const email = decodedToken.email;
-            if (!email) throw new UnauthorizedException('Invalid token, no email found');
+    @Transactional()
+    async handle(command: RegisterCommand) {
+        const { uuid, email, password, role, provider, provider_id } = command.register;
 
-            const existingUser = await queryRunner.manager.findOne(User, {
-                where: { email: data.email },
-            });
-
-            if (existingUser) {
-                throw new ConflictException('Email already registered');
-            }
-
-            const user = queryRunner.manager.create(User, {
-                email: data.email,
-            });
-
-            await queryRunner.manager.save(user);
-
-            const outbox = queryRunner.manager.create(Outbox, {
-                message: {
-                    id: user.id,
-                    email: user.email,
-                }
-            })
-
-            await queryRunner.manager.save(outbox);
-
-            await queryRunner.commitTransaction();
-            return {
-                id: user.id,
-                email: user.email,
-            };
-        } catch (error) {
-            await queryRunner.rollbackTransaction();
-            throw error;
-        } finally {
-            await queryRunner.release();
+        const existingUser = await this.repository.findAuthDetails(email);
+        if (existingUser) {
+            throw new ConflictException('Email already registered');
         }
-    }
 
+        let hashPassword;
+        if (password) {
+            hashPassword = await bcrypt.hash(password, 10);
+        }
+
+        const user = {
+            uuid,
+            email,
+            password: hashPassword,
+            role,
+            provider,
+            provider_id
+        };
+
+        const savedUser = await this.repository.saveAuthDetails(user);
+        await this.outboxMessageRepository.storeOutboxMessage(new UserRegister(savedUser));
+
+
+        return savedUser;
+    }
 }

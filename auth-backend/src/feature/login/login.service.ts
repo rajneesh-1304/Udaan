@@ -3,33 +3,36 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { User } from 'src/domain/entity/user.entity';
-import { adminAuth } from 'src/firebaseAdmin';
-import { DataSource } from 'typeorm';
+import { LoginCommand } from './login.command';
+import { AuthProvider } from 'src/domain/auth/enums/auth_provider.enum';
+import { AuthRepository } from 'src/infrastructure/repositories/auth.repository';
+import { Auth } from 'src/domain/auth/auth.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
-export class LoginService {
-  constructor(private readonly dataSource: DataSource) { }
+export class LoginHandler {
+  constructor(
+    @InjectRepository(AuthRepository)
+    private readonly repository: AuthRepository
+  ){}
 
-
-  async login(data: { email: string, tokenId: string }) {
-    try {
-      const decodedToken = await adminAuth.verifyIdToken(data.tokenId);
-      const email = decodedToken.email;
-      if (!email) throw new UnauthorizedException('Invalid token, no email found');
-
-      const userRepo = this.dataSource.getRepository(User);
-      const user = await userRepo.findOne({ where: { email } });
-
-      if (!user) throw new NotFoundException('User not found');
+  async handle(command: LoginCommand) {
+    const { email, password, provider, provider_id } = command.login;
+    let user: Auth;
     
-      return {
-        id: user.id,
-        email: user.email,
-      };
-    } catch (error) {
-      throw new UnauthorizedException(error);
+    if(provider == AuthProvider.LOCAL){
+      user = await this.repository.findAuthDetails(email);
+      if(!user) throw new NotFoundException('User not found');
+
+      const isPasswordCorrect = await user.comparePassword(password);
+      if(!isPasswordCorrect) throw new UnauthorizedException('Invalid password');
     }
+    else{
+      user = await this.repository.findAuthDetails(email, provider, provider_id);
+      if(!user) throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
-  
+
 }

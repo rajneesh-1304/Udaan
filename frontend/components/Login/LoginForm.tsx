@@ -24,7 +24,6 @@ import { useAppSelector } from "@//redux/hooks";
 import { signOut } from "firebase/auth";
 import { FcGoogle } from "react-icons/fc";
 import { Typography } from "@mui/material";
-import Cookies from 'js-cookie';
 import "./login.css";
 
 const LoginUserSchema = z.object({
@@ -35,12 +34,12 @@ const LoginUserSchema = z.object({
 type LoginFormInputs = z.infer<typeof LoginUserSchema>;
 
 interface UserState {
-  users: LoginFormInputs[];
-  isAuthenticated: boolean;
+  users?: LoginFormInputs[];
+  isAuthenticated?: boolean;
 }
 
 interface RootState {
-  users: UserState;
+  users?: UserState;
 }
 
 export default function LoginForm() {
