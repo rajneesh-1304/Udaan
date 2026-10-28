@@ -1,5 +1,21 @@
-import { Controller, Post, Body, Res, Patch, Param, Get, Query, UseInterceptors, UploadedFiles, UploadedFile, UseGuards } from '@nestjs/common';
-import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import {
+  Controller,
+  Post,
+  Body,
+  Res,
+  Patch,
+  Param,
+  Get,
+  Query,
+  UseInterceptors,
+  UploadedFiles,
+  UploadedFile,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
 import { productImageStorage } from 'src/infra/multer/multer';
 import { Profile } from 'src/domain/DTO/profile';
 import { JwtAuthGuard } from 'src/jwt.guard';
@@ -7,7 +23,7 @@ import { AddProfileService } from './addProfile.service';
 
 @Controller('profile')
 export class AddProfileController {
-  constructor(private readonly addProfileService: AddProfileService) { }
+  constructor(private readonly addProfileService: AddProfileService) {}
 
   @Post('add')
   // @UseInterceptors(

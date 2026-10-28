@@ -7,11 +7,12 @@ import { ConsumerCommand } from './command';
 import { ConsumerService } from '../rabbitMq/consumer';
 
 @Module({
-  imports: [TypeOrmModule.forRoot({
-    ...AppDataSource.options,
-  }), 
-  OutboxModule
-],
+  imports: [
+    TypeOrmModule.forRoot({
+      ...AppDataSource.options,
+    }),
+    OutboxModule,
+  ],
   providers: [ConsumerCommand, ConsumerService, RabbitConnection],
 })
 export class Command {}

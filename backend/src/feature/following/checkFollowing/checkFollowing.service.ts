@@ -11,7 +11,7 @@ import { DataSource } from 'typeorm';
 
 @Injectable()
 export class CheckFollowingService {
-  constructor(private readonly dataSource: DataSource) { }
+  constructor(private readonly dataSource: DataSource) {}
 
   async checkFollowing(otherUserId: string, userId: string) {
     if (!userId || !otherUserId) {
@@ -21,21 +21,19 @@ export class CheckFollowingService {
     const followRepo = this.dataSource.getRepository(Follow);
 
     const [user, otherUser] = await Promise.all([
-      userRepo.findOne({where: {id: userId}}),
-      userRepo.findOne({where: {id: otherUserId}}),
+      userRepo.findOne({ where: { id: userId } }),
+      userRepo.findOne({ where: { id: otherUserId } }),
     ]);
-    
-    if(!user){
-      throw new NotFoundException("User not found");
+
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
-    if(!otherUser){
-      throw new NotFoundException("Other user not found");
+    if (!otherUser) {
+      throw new NotFoundException('Other user not found');
     }
 
     const follow = await followRepo.findOne({
-      where: [
-        {user: {id: userId}, follower: {id:otherUserId}}
-      ]
+      where: [{ user: { id: userId }, follower: { id: otherUserId } }],
     });
     return !!follow;
   }

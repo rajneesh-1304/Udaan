@@ -24,7 +24,9 @@ export class TotalFollowingService {
       throw new NotFoundException('User not found');
     }
 
-    const total = await followRepo.count({ where: { follower:{id: userId} } });
+    const total = await followRepo.count({
+      where: { follower: { id: userId } },
+    });
 
     return total;
   }

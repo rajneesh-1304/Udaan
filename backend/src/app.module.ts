@@ -4,7 +4,7 @@ import { dataSourceOptions } from './data-source';
 import { FirebaseAuthGuard } from './firebase-auth.guard';
 import { ProfileModule } from './feature/profile/profile.module';
 import { FollowModule } from './feature/following/following.module';
-import { ConnectionModule } from './feature/connection/connection.module';
+import { PostModule } from './feature/post/post.module';
 import { OutboxService } from './feature/services/outbox.service';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -23,11 +23,11 @@ class AppController {
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      ...dataSourceOptions, 
+      ...dataSourceOptions,
     }),
     ConfigModule.forRoot({
-      isGlobal: true, 
-      envFilePath: '.env', 
+      isGlobal: true,
+      envFilePath: '.env',
     }),
     // CacheModule.register({isGlobal: true}),
     RedisModule.forRootAsync({
@@ -38,17 +38,18 @@ class AppController {
       }),
       inject: [ConfigService],
     }),
- 
+
     ProfileModule,
     FollowModule,
-    ConnectionModule,    
+    PostModule,
   ],
   controllers: [AppController],
-  providers: [OutboxService,
+  providers: [
+    OutboxService,
     // {
-    //   provide: APP_INTERCEPTOR, 
+    //   provide: APP_INTERCEPTOR,
     //   useClass: CacheInterceptor,
     // },
-  ]
+  ],
 })
 export class AppModule {}

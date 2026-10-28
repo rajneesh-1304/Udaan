@@ -12,7 +12,10 @@ import { DataSource } from 'typeorm';
 
 @Injectable()
 export class RemoveFollowService {
-  constructor(@InjectRedis() private readonly redis: Redis, private readonly dataSource: DataSource) {}
+  constructor(
+    @InjectRedis() private readonly redis: Redis,
+    private readonly dataSource: DataSource,
+  ) {}
 
   async removeFollowing(followerId: string, userId: string) {
     if (!userId || !followerId) {
@@ -46,8 +49,8 @@ export class RemoveFollowService {
         throw new ConflictException('Not present in follower list');
       }
 
-      await followRepo.remove(followRecord); 
-      await userRepo.decrement({id: userId}, 'totalFollowers', 1);
+      await followRepo.remove(followRecord);
+      await userRepo.decrement({ id: userId }, 'totalFollowers', 1);
       await this.redis.del(`user:${followerId}`);
 
       await queryRunner.commitTransaction();

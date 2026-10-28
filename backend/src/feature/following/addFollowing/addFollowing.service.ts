@@ -13,7 +13,10 @@ import { InjectRedis } from '@nestjs-modules/ioredis';
 
 @Injectable()
 export class AddFollowingService {
-  constructor(@InjectRedis() private readonly redis: Redis, private readonly dataSource: DataSource) {}
+  constructor(
+    @InjectRedis() private readonly redis: Redis,
+    private readonly dataSource: DataSource,
+  ) {}
 
   async addFollowing(followerId: string, userId: string) {
     if (!userId || !followerId) {

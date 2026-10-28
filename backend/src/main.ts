@@ -24,7 +24,7 @@ async function bootstrap() {
   // dataSource.initialize()
   // .then(() => console.log("Data Source has been initialized!"))
   // .catch((err) => console.error("Error during Data Source initialization", err));
-  console.log('Listening on port 3001')
+  console.log('Listening on port 3001');
   await app.listen(3001);
 }
 bootstrap();

@@ -7,12 +7,14 @@ export class PublisherService {
 
   async publish(message: any) {
     const channel = await this.rabbit.connect(process.env.RABBITMQ_URL);
-    await channel.assertExchange('notifications.fanout', 'fanout', { durable: true });
+    await channel.assertExchange('notifications.fanout', 'fanout', {
+      durable: true,
+    });
     channel.publish(
       'notifications.fanout',
       'fanout',
       Buffer.from(JSON.stringify(message)),
-      { persistent: true }
+      { persistent: true },
     );
   }
 }

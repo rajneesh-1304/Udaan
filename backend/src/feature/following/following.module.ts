@@ -15,12 +15,12 @@ import { JwtAuthGuard } from 'src/jwt.guard';
 import { JwtService } from '@nestjs/jwt';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), ],
+  imports: [TypeOrmModule.forFeature([User])],
   controllers: [
     AddFollowController,
     CheckFollowingController,
     TotalFollowingController,
-    RemoveFollowController
+    RemoveFollowController,
   ],
   providers: [
     AddFollowingService,
@@ -28,8 +28,9 @@ import { JwtService } from '@nestjs/jwt';
     TotalFollowingService,
     RemoveFollowService,
     RabbitConnection,
-    PublisherService
-    , JwtAuthGuard, JwtService
+    PublisherService,
+    JwtAuthGuard,
+    JwtService,
   ],
 })
 export class FollowModule {}

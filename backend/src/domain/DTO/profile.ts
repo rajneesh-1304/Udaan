@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsNotEmpty, IsIn, IsOptional } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 
 export class Profile {
   @IsOptional()

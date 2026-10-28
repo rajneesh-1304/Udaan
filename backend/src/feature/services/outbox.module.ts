@@ -1,5 +1,5 @@
-import { Module } from "@nestjs/common";
-import { OutboxService } from "./outbox.service";
+import { Module } from '@nestjs/common';
+import { OutboxService } from './outbox.service';
 
 @Module({
   providers: [OutboxService],

@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsNotEmpty, IsIn, IsOptional } from 'class-validator';
+import { IsString, IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class UsersDefinition {
   @IsEmail()

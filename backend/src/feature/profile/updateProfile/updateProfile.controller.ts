@@ -1,5 +1,21 @@
-import { Controller, Post, Body, Res, Patch, Param, Get, Query, UseInterceptors, UploadedFiles, UploadedFile, UseGuards } from '@nestjs/common';
-import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import {
+  Controller,
+  Post,
+  Body,
+  Res,
+  Patch,
+  Param,
+  Get,
+  Query,
+  UseInterceptors,
+  UploadedFiles,
+  UploadedFile,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
 import { productImageStorage } from 'src/infra/multer/multer';
 import { Profile } from 'src/domain/DTO/profile';
 import { UpdateProfileService } from './updateProfile.service';
@@ -7,7 +23,7 @@ import { JwtAuthGuard } from 'src/jwt.guard';
 
 @Controller('profile')
 export class UpdateProfileController {
-  constructor(private readonly updateService: UpdateProfileService) { }
+  constructor(private readonly updateService: UpdateProfileService) {}
 
   @UseGuards(JwtAuthGuard)
   @Patch('update/:id')

@@ -8,7 +8,7 @@ import Redis from 'ioredis';
 export class GetProfileService {
   constructor(
     @InjectRedis() private readonly redis: Redis,
-    private readonly dataSource: DataSource
+    private readonly dataSource: DataSource,
   ) {}
 
   async getProfile(id: string) {

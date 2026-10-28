@@ -1,13 +1,13 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import * as dotenv from 'dotenv';
-import { User } from './domain/entity/user.entity';
-import { Education } from './domain/entity/education.entity';
-import { Experience } from './domain/entity/experience.entity';
-import { Outbox } from './domain/entity/outbox.entity';
-import { Follow } from './domain/entity/follow.entity';
-import { Connection } from './domain/entity/connection.entity';
-import { Inbox } from './domain/entity/inbox.entity';
-import { Skills } from './domain/entity/skills.entity';
+import { User } from './domain/user/user.entity';
+import { Follow } from './domain/user/follow.entity';
+import { Post } from './domain/user-post/post.entity';
+import { Like } from './domain/user-post/like.entity';
+import { Comment } from './domain/user-post/comment.entity';
+import { Repost } from './domain/user-post/repost.entity';
+import { Outbox } from './domain/outbox/outbox.entity';
+import { Inbox } from './domain/inbox/inbox.entity';
 
 dotenv.config();
 
@@ -19,7 +19,7 @@ const rawDataSourceOptions = {
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
   synchronize: false,
-  entities: [User, Education, Experience, Outbox, Follow, Connection, Skills, Inbox],
+  entities: [User, Follow, Post, Like, Comment, Repost, Outbox, Inbox],
   migrations: ['dist/infra/migrations/*.js'],
   seeds: ['dist/seeds/**/*.js'],
   logging: true,

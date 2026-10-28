@@ -1,7 +1,7 @@
-import { NestFactory } from "@nestjs/core";
-import { AppModule } from "../../app.module";
-import { OutboxService } from "src/feature/services/outbox.service";
-import { PublisherService } from "../rabbitMq/publisher";
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from '../../app.module';
+import { OutboxService } from 'src/feature/services/outbox.service';
+import { PublisherService } from '../rabbitMq/publisher';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
@@ -15,9 +15,8 @@ async function bootstrap() {
     try {
       await publisher.publish(msg);
       await outbox.markDispatched(msg.id.toString());
-
     } catch (err) {
-      console.error("Failed to process message:", msg.id, err);
+      console.error('Failed to process message:', msg.id, err);
     }
   }
 
