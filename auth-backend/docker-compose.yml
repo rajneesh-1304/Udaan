@@ -47,6 +47,29 @@ services:
     networks:
       - auth_network
 
+  # Redis service
+  redis:
+    container_name: auth-backend-redis
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    volumes:
+      - auth_redis_data:/data
+    networks:
+      - auth_network
+
+  # Mailpit service (Mock SMTP & Web UI)
+  mailpit:
+    container_name: auth-backend-mailpit
+    image: axllent/mailpit:latest
+    restart: always
+    ports:
+      - '${MAIL_FORWARD_PORT:-1025}:1025'
+      - '${MAIL_WEB_UI_PORT:-8025}:8025'
+    networks:
+      - auth_network
+
   # Auth Backend service
   backend:
     container_name: auth-backend
@@ -62,10 +85,15 @@ services:
       - .env
     environment:
       - DB_HOST=database
+      - REDIS_HOST=redis
+      - MAIL_HOST=mailpit
+      - MAIL_PORT=1025
       - RABBITMQ_DSN=amqp://${RABBITMQ_USERNAME:-guest}:${RABBITMQ_PASSWORD:-guest}@rabbitmq:5672
     depends_on:
       - database
       - rabbitmq
+      - redis
+      - mailpit
     networks:
       - auth_network
     restart: on-failure
@@ -83,3 +111,4 @@ volumes:
   auth_pgadmin_data: {}
   auth_rabbitmq_data: {}
   auth_rabbitmq_logs: {}
+  auth_redis_data: {}

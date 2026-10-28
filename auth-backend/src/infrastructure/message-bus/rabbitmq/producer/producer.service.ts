@@ -19,28 +19,24 @@ export class ProducerService {
     private get config(): ConfigType {
         return this.connection.getConnectionConfiguration();
     }
-    
+
     async handle(messages: OutboxMessage[]) {
         await this.connect();
         const exchanges = [
-            { name: this.config.primaryQueueExchange, type: this.config.primaryQueueExchangeType},
+            { name: this.config.primaryQueueExchange, type: this.config.primaryQueueExchangeType },
             { name: this.config.retryQueueExchange, type: this.config.retryQueueExchangeType },
-            { name: this.config.errorQueueExchange, type: this.config.errorQueueExchangeType },
-            ...messages
-                .map((m) => m.getDestination()?.exchange)
-                .filter((name): name is string => Boolean(name))
-                .map((name) => ({ name, type: this.config.primaryQueueExchangeType || 'fanout' })),
+            { name: this.config.errorQueueExchange, type: this.config.errorQueueExchangeType }
         ];
         await this.rabbitmqConfigurerService.configureExchanges(exchanges);
 
-        for(const message of messages){
+        for (const message of messages) {
             await this.publisher(message);
         }
 
         await this.close();
     }
-    
-    
+
+
     private async connect() {
         await this.connection.connect();
     }
@@ -55,7 +51,7 @@ export class ProducerService {
             const properties = outboxMessage.getProperties();
             const { exchange, routingKey } = outboxMessage.getDestination();
 
-            const messageToPublish : RabbitMQPublishMessage = {
+            const messageToPublish: RabbitMQPublishMessage = {
                 exchange: exchange,
                 routingKey: routingKey,
                 content: JSON.stringify(message),
@@ -63,7 +59,7 @@ export class ProducerService {
             };
 
             const isPublished = await this.connection.publish(messageToPublish);
-            if(!isPublished) throw new Error('Message could not be published.');
+            if (!isPublished) throw new Error('Message could not be published.');
 
             outboxMessage.markAsSent();
             await this.outboxMessageRepository.save(outboxMessage);
@@ -73,6 +69,6 @@ export class ProducerService {
                 error,
             );
         }
-    
+
     }
 }

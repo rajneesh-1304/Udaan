@@ -45,4 +45,12 @@ export class Auth {
     async comparePassword(password: string){
         return await bcrypt.compare(password, this.password);
     }
+
+    isLocalProvider() {
+        return this.provider == AuthProvider.LOCAL;
+    }
+
+    isGoogleProvider() {
+        return this.provider == AuthProvider.GOOGLE;
+    }
 }
