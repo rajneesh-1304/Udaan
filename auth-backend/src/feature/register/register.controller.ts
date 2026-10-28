@@ -3,6 +3,8 @@ import { Response } from 'express';
 import { RegisterHandler } from './register.service';
 const jwt = require('jsonwebtoken');
 import axios from 'axios';
+import { RegisterDto } from './register.dto';
+import { RegisterCommand } from './register.command';
 
 @Controller('auth')
 export class RegisterController {
@@ -11,9 +13,10 @@ export class RegisterController {
   ) {}
 
   @Post('register')
-  async registerUser(@Body() userData: any,
+  async registerUser(@Body() userData: RegisterDto,
     @Res({ passthrough: true }) res: Response,) {
-    const user = await this.handler.handle(userData);
+    const command = new RegisterCommand(userData);
+    const user = await this.handler.handle(command);
 
     const token = jwt.sign(
       { userId: user.id },

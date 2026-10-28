@@ -1,26 +1,37 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateIf,
+} from 'class-validator';
 import { AuthProvider } from 'src/domain/auth/enums/auth_provider.enum';
 import { Role } from 'src/domain/auth/enums/role.enum';
 
 export class RegisterDto {
-    @IsString()
-    uuid: string;
+  @IsString()
+  @IsNotEmpty()
+  uuid: string;
 
-    @IsEmail()
-    @IsNotEmpty()
-    email: string;
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
 
-    @IsString()
-    @IsOptional()
-    password: string;
+  @ValidateIf((dto: RegisterDto) => dto.provider === AuthProvider.LOCAL)
+  @IsString()
+  @IsNotEmpty()
+  password?: string;
 
-    @IsString()
-    @IsOptional()
-    provider_id: string;
+  @ValidateIf((dto: RegisterDto) => dto.provider === AuthProvider.GOOGLE)
+  @IsString()
+  @IsNotEmpty()
+  provider_id?: string;
 
-    @IsEnum(Role)
-    role: Role
+  @IsEnum(Role)
+  role: Role;
 
-    @IsEnum(AuthProvider)
-    provider: AuthProvider
+  @IsEnum(AuthProvider)
+  provider: AuthProvider;
 }

@@ -1,12 +1,7 @@
-import { Module, Controller, Get, UseGuards } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { dataSourceOptions } from './data-source';
-import { FirebaseAuthGuard } from './firebase-auth.guard';
-import { UserModule } from './feature/user.module';
+import { Controller, Get } from '@nestjs/common';
 
 @Controller()
 class AppController {
-  @UseGuards(FirebaseAuthGuard)
   @Get()
   root() {
     return { message: 'NestJS Backend is running!' };

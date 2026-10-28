@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { Event } from 'src/domain/common/event';
 import { OutboxMessage } from 'src/domain/outbox-message/outbox-message.entity';
 import { DataSource, Repository } from 'typeorm';
+import { OutboxMessagePayload } from './outbox-message.interface';
+import { MessageDestinationService } from './message-service';
+import { OutBoxStatus } from 'src/domain/outbox-message/enums/outbox-status.enum';
 
 @Injectable()
 export class OutboxMessageRepository extends Repository<OutboxMessage> {
@@ -10,7 +14,7 @@ export class OutboxMessageRepository extends Repository<OutboxMessage> {
 
   createOutboxPayloadFromEvent = (
     outbox_message: Event,
-  ): OutboxMessagePayloadType => {
+  ): OutboxMessagePayload => {
 
     const messageType = outbox_message.getType();    
     const { exchange, routingKey } = MessageDestinationService.get(messageType);
@@ -28,6 +32,14 @@ export class OutboxMessageRepository extends Repository<OutboxMessage> {
 
   async storeOutboxMessage(outbox_message: Event ) {
     return await this.save(this.createOutboxPayloadFromEvent(outbox_message));
+  }
+
+  async getUnsentMessages(limit: number) {
+    const [rows] = await this.findAndCount({
+      where: { status: OutBoxStatus.PENDING },
+      take: limit,
+    });
+    return rows;
   }
 
 }

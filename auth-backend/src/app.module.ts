@@ -1,19 +1,17 @@
 import { Module } from "@nestjs/common";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { dataSourceOptions } from "./data-source";
-import { UserModule } from "./feature/user.module";
+import { TypeOrmModule } from "./infrastructure/database/typorm.config";
 import AppController from "./app.controller";
-import { OutboxModule } from "./feature/services/outbox.module";
+import { AuthModule } from "./feature/user.module";
+import { ConfigModule } from "@nestjs/config";
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      ...dataSourceOptions, 
-    }),
-
-    UserModule, 
-    OutboxModule  
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule,
+    AuthModule,
+    
   ],
   controllers: [AppController],
 })
+
 export class AppModule {}

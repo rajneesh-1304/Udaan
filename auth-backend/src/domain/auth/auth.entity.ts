@@ -1,6 +1,8 @@
 import { Column, CreateDateColumn, UpdateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { AuthProvider } from "./enums/auth_provider.enum";
 import { Role } from "./enums/role.enum";
+import bcrypt from "bcrypt";
+import { Exclude } from "class-transformer";
 
 @Entity('auth')
 export class Auth {
@@ -14,6 +16,7 @@ export class Auth {
     email: string;
 
     @Column({ type: "varchar", nullable: true })
+    @Exclude({ toPlainOnly: true })
     password: string;
 
     @Column({

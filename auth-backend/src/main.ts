@@ -8,23 +8,18 @@ const cookieParser = require('cookie-parser');
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.use('/uploads', express.static('uploads'));
   app.use(cookieParser());
 
-  app.enableCors({
-    origin: 'http://localhost:3000',
-    credentials: true,
-  });
+  app.enableCors();
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
       whitelist: true,
     }),
   );
-  // dataSource.initialize()
-  // .then(() => console.log("Data Source has been initialized!"))
-  // .catch((err) => console.error("Error during Data Source initialization", err));
 
-  await app.listen(3003);
+  const port = process.env.PORT || 8080;
+  await app.listen(port);
+  console.log(`Application is running on port ${port}`);
 }
 bootstrap();

@@ -1,0 +1,85 @@
+services:
+  # PostgreSQL DB service
+  database:
+    image: postgres:16.1-alpine3.18
+    container_name: auth-backend-database
+    restart: always
+    ports:
+      - ${DB_FORWARD_PORT:-5432}:5432
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_DATABASE:-auth_db}
+    volumes:
+      - auth_pg_data:/var/lib/postgresql/data
+    networks:
+      - auth_network
+
+  # pgAdmin service
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: auth-backend-pgadmin
+    restart: always
+    ports:
+      - ${PGADMIN_FORWARD_PORT:-8888}:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    volumes:
+      - auth_pgadmin_data:/var/lib/pgadmin
+    networks:
+      - auth_network
+
+  # RabbitMQ service
+  rabbitmq:
+    container_name: auth-backend-rabbitmq
+    image: rabbitmq:3-management-alpine
+    restart: always
+    ports:
+      - '${RABBITMQ_FORWARD_PORT:-5672}:5672'
+      - '${RABBITMQ_MANAGEMENT_FORWARD_PORT:-15672}:15672'
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+    volumes:
+      - auth_rabbitmq_data:/var/lib/rabbitmq/
+      - auth_rabbitmq_logs:/var/log/rabbitmq
+    networks:
+      - auth_network
+
+  # Auth Backend service
+  backend:
+    container_name: auth-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    ports:
+      - ${APP_FORWARD_PORT:-8080}:${APP_PORT:-8080}
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=database
+      - RABBITMQ_DSN=amqp://${RABBITMQ_USERNAME:-guest}:${RABBITMQ_PASSWORD:-guest}@rabbitmq:5672
+    depends_on:
+      - database
+      - rabbitmq
+    networks:
+      - auth_network
+    restart: on-failure
+    tty: true
+    stdin_open: true
+    expose:
+      - ${APP_PORT:-8080}
+
+networks:
+  auth_network:
+    name: auth-backend-network
+
+volumes:
+  auth_pg_data: {}
+  auth_pgadmin_data: {}
+  auth_rabbitmq_data: {}
+  auth_rabbitmq_logs: {}

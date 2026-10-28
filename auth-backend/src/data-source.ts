@@ -1,25 +1,35 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
-import * as dotenv from 'dotenv';
-import { User } from './domain/entity/user.entity';
-import { Outbox } from './domain/entity/outbox.entity';
+import { SeederOptions } from 'typeorm-extension';
+import { ConfigService } from '@nestjs/config';
+import {
+  initializeTransactionalContext,
+  addTransactionalDataSource,
+} from 'typeorm-transactional';
+require('dotenv').config();
 
-dotenv.config();
+initializeTransactionalContext();
 
-const rawDataSourceOptions = {
+let dataSourceInstance: DataSource | null = null;
+
+export const dataSourceOptions = (
+  configService: ConfigService,
+): DataSourceOptions & SeederOptions => ({
   type: 'postgres',
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT),
-  username: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
+  host: configService.get<string>('DB_HOST'),
+  port: configService.get<number>('DB_PORT'),
+  username: configService.get<string>('DB_USER'),
+  password: configService.get<string>('DB_PASSWORD'),
+  database: configService.get<string>('DB_DATABASE'),
+  entities: ['dist/domain/**/*entity.js'],
   synchronize: false,
-  entities: [User, Outbox],
-  migrations: ['dist/infra/migrations/*.js'],
-  seeds: ['dist/seeds/**/*.js'],
-  logging: true,
-};
+  migrationsTableName: 'migrations',
+  migrations: ['dist/infrastructure/database/migrations/*.js'],
+});
 
-export const dataSourceOptions = rawDataSourceOptions as DataSourceOptions;
-
-const dataSource = new DataSource(dataSourceOptions);
-export default dataSource;
+export const dataSource = (() => {
+  if (!dataSourceInstance) {
+    dataSourceInstance = new DataSource(dataSourceOptions(new ConfigService()));
+    return addTransactionalDataSource(dataSourceInstance);
+  }
+  return dataSourceInstance;
+})();

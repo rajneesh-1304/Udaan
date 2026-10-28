@@ -1,24 +1,12 @@
-FROM node:22-alpine AS dev
+ARG NODE_IMAGE=node:20-alpine
+
+# Base image
+FROM $NODE_IMAGE AS base
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci --legacy-peer-deps
+COPY package*.json ./
+
+FROM base AS dev
+RUN npm install
 COPY . .
-EXPOSE 3000
+EXPOSE 8080
 CMD ["npm", "run", "start:dev"]
-
-
-# FROM node:22-alpine AS build
-# WORKDIR /app
-# COPY package.json package-lock.json ./
-# RUN npm ci --legacy-peer-deps
-# COPY . .
-# RUN npm run build
-
-
-# FROM node:22-alpine AS prod
-# WORKDIR /app
-# COPY package.json package-lock.json ./
-# RUN npm ci 
-# COPY --from=build /app/dist ./dist
-# EXPOSE 3000
-# CMD ["node", "dist/main.js"]
